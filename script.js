@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
             name: 'GitHub',
             url: 'https://github.com/search',
             param: 'q',
-            logo: './Logo/github.svg',
+            logo: './Logo/github.png',
             description: 'GitHub 是全球最大的代码托管平台，可以搜索开源项目和代码。'
         },
         bilibili: {
