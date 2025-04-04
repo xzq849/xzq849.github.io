@@ -11,42 +11,42 @@ document.addEventListener('DOMContentLoaded', function() {
             name: 'Google',
             url: 'https://www.google.com/search',
             param: 'q',
-            logo: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            logo: './Logo/google.svg',
             description: 'Google 是全球最大的搜索引擎，提供网页、图片、视频等多种搜索服务。'
         },
         baidu: {
             name: '百度',
             url: 'https://www.baidu.com/s',
             param: 'wd',
-            logo: 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png',
+            logo: './Logo/baidu.svg',
             description: '百度是中国最大的搜索引擎，提供网页、贴吧、知道等多种服务。'
         },
         bing: {
             name: 'Bing',
             url: 'https://www.bing.com/search',
             param: 'q',
-            logo: 'https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico',
+            logo: './Logo/Bing.png',
             description: 'Bing 是微软推出的搜索引擎，提供网页、图片、视频等多种搜索服务。'
         },
         github: {
             name: 'GitHub',
             url: 'https://github.com/search',
             param: 'q',
-            logo: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png',
+            logo: './Logo/github.svg',
             description: 'GitHub 是全球最大的代码托管平台，可以搜索开源项目和代码。'
         },
         bilibili: {
             name: '哔哩哔哩',
             url: 'https://search.bilibili.com/all',
             param: 'keyword',
-            logo: 'https://www.bilibili.com/v/anime/logo/img/1.png',
+            logo: './Logo/bilibili.svg',
             description: '哔哩哔哩是中国知名的视频弹幕网站，提供动画、游戏、音乐等内容。'
         },
         yandex: {
             name: 'Yandex',
             url: 'https://yandex.com/search/',
             param: 'text',
-            logo: 'https://yastatic.net/s3/home-static/_/37/37a02b5dc7a51abac55d8a5b6c865f0e.png',
+            logo: './Logo/yandex.svg',
             description: 'Yandex 是俄罗斯最大的搜索引擎，提供网页、图片、视频等多种搜索服务。'
         }
     };
