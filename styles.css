@@ -1,0 +1,183 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+}
+
+.search-container {
+    margin-bottom: 30px;
+}
+
+.search-engines {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-engine {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.search-engine:hover {
+    background-color: #e0e0e0;
+}
+
+.search-engine.active {
+    background-color: #4285f4;
+    color: white;
+}
+
+.search-box {
+    position: relative;
+    margin-top: 20px;
+}
+
+#search-form {
+    display: flex;
+    width: 100%;
+}
+
+#search-input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #ddd;
+    border-radius: 30px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#search-input:focus {
+    border-color: #4285f4;
+}
+
+#search-button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+#search-button:hover {
+    background-color: #3367d6;
+}
+
+.engine-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.engine-logo {
+    margin-bottom: 15px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.engine-logo img {
+    max-height: 100%;
+    max-width: 200px;
+}
+
+#engine-description {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+footer {
+    margin-top: auto;
+    text-align: center;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+footer a {
+    color: #4285f4;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+    
+    .search-engines {
+        gap: 8px;
+    }
+    
+    .search-engine {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    #search-input {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    
+    #search-button {
+        width: 35px;
+        height: 35px;
+    }
+}
