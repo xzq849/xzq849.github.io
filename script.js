@@ -147,3 +147,28 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(style);
 });
+
+// 获取时间显示元素
+const timeDisplay = document.getElementById('time-display');
+
+// 更新时间函数
+// 时间格式化函数
+function formatTime(date) {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+// 更新时间显示
+function updateTime() {
+    const timeDisplay = document.getElementById('time-display');
+    const now = new Date();
+    timeDisplay.textContent = formatTime(now);
+}
+
+// 初始化定时器
+window.addEventListener('DOMContentLoaded', () => {
+    updateTime();
+    setInterval(updateTime, 1000);
+});
