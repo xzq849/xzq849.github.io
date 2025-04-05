@@ -8,6 +8,107 @@ document.addEventListener('DOMContentLoaded', function() {
         password: 'x84907621'
     };
     
+    // 通用函数：检查登录状态并设置通用元素
+    function checkLoginAndSetupCommon() {
+        // 检查登录状态
+        if (!localStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        // 显示用户名
+        const usernameElement = document.getElementById('admin-username');
+        if (usernameElement) {
+            usernameElement.textContent = localStorage.getItem('adminUsername');
+        }
+        
+        // 退出登录
+        const logoutButton = document.querySelector('.logout');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminUsername');
+                window.location.href = 'login.html';
+            });
+        }
+        
+        return true;
+    }
+    
+    // 显示消息函数
+    function showMessage(text, type = 'success') {
+        const messageElement = document.getElementById('theme-message');
+        if (messageElement) {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+            messageElement.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
+    }
+    
+    // 应用主题函数
+    function applyTheme(theme) {
+        // 创建或获取主题样式元素
+        let themeStyle = document.getElementById('dynamic-theme');
+        if (!themeStyle) {
+            themeStyle = document.createElement('style');
+            themeStyle.id = 'dynamic-theme';
+            document.head.appendChild(themeStyle);
+        }
+        
+        // 生成CSS变量
+        let css = `:root {
+            --primary-color: ${theme.primaryColor};
+            --primary-dark: ${adjustColor(theme.primaryColor, -20)};
+            --secondary-color: ${theme.secondaryColor};
+            --accent-color: ${theme.accentColor};
+        }`;
+        
+        // 添加壁纸样式
+        if (theme.wallpaperType === 'gradient') {
+            let gradientValue;
+            switch (theme.wallpaperValue) {
+                case 'sunset':
+                    gradientValue = 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)';
+                    break;
+                case 'ocean':
+                    gradientValue = 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)';
+                    break;
+                case 'forest':
+                    gradientValue = 'linear-gradient(135deg, #a8e063 0%, #56ab2f 100%)';
+                    break;
+                default: // default gradient
+                    gradientValue = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+            }
+            css += `body { background: ${gradientValue}; }`;
+        } else if (theme.wallpaperType === 'solid') {
+            css += `body { background: ${theme.wallpaperValue}; }`;
+        } else if (theme.wallpaperType === 'custom' && theme.customWallpaper) {
+            css += `body { 
+                background-image: url(${theme.customWallpaper});
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+            }`;
+        }
+        
+        // 应用样式
+        themeStyle.textContent = css;
+    }
+    
+    // 辅助函数：调整颜色亮度
+    function adjustColor(color, amount) {
+        return '#' + color.replace(/^#/, '').replace(/../g, color => {
+            const num = Math.min(255, Math.max(0, parseInt(color, 16) + amount));
+            return num.toString(16).padStart(2, '0');
+        });
+    }
+    
     // 登录页面逻辑
     if (currentPage === 'login.html') {
         const loginForm = document.getElementById('login-form');
@@ -38,6 +139,297 @@ document.addEventListener('DOMContentLoaded', function() {
                 loginMessage.className = 'message error';
             }
         });
+    }
+    
+    // 主题设置页面逻辑
+    if (currentPage === 'theme.html') {
+        if (!checkLoginAndSetupCommon()) return;
+        
+        // 获取主题设置元素
+        const primaryColorInput = document.getElementById('primary-color');
+        const secondaryColorInput = document.getElementById('secondary-color');
+        const accentColorInput = document.getElementById('accent-color');
+        const wallpaperOptions = document.querySelectorAll('.wallpaper-option');
+        const uploadWallpaperBtn = document.getElementById('upload-wallpaper-btn');
+        const wallpaperUpload = document.getElementById('wallpaper-upload');
+        const saveThemeBtn = document.getElementById('save-theme');
+        const previewThemeBtn = document.getElementById('preview-theme');
+        const resetThemeBtn = document.getElementById('reset-theme');
+        
+        // 默认主题设置
+        const defaultTheme = {
+            primaryColor: '#4285f4',
+            secondaryColor: '#34a853',
+            accentColor: '#ea4335',
+            wallpaperType: 'gradient',
+            wallpaperValue: 'default',
+            customWallpaper: null
+        };
+        
+        // 从localStorage加载主题设置
+        let currentTheme = JSON.parse(localStorage.getItem('siteTheme')) || {...defaultTheme};
+        
+        // 初始化颜色选择器和显示值
+        function initColorInputs() {
+            primaryColorInput.value = currentTheme.primaryColor;
+            secondaryColorInput.value = currentTheme.secondaryColor;
+            accentColorInput.value = currentTheme.accentColor;
+            
+            // 更新颜色值显示
+            primaryColorInput.nextElementSibling.textContent = currentTheme.primaryColor;
+            secondaryColorInput.nextElementSibling.textContent = currentTheme.secondaryColor;
+            accentColorInput.nextElementSibling.textContent = currentTheme.accentColor;
+        }
+        
+        // 初始化壁纸选项
+        function initWallpaperOptions() {
+            wallpaperOptions.forEach(option => {
+                const type = option.getAttribute('data-type');
+                const value = option.getAttribute('data-value');
+                
+                if (type === currentTheme.wallpaperType && value === currentTheme.wallpaperValue) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+                
+                // 如果是自定义壁纸且有保存的壁纸，显示预览
+                if (type === 'custom' && currentTheme.customWallpaper) {
+                    const preview = option.querySelector('.wallpaper-preview');
+                    preview.innerHTML = '';
+                    preview.style.backgroundImage = `url(${currentTheme.customWallpaper})`;
+                    preview.style.backgroundSize = 'cover';
+                    preview.style.backgroundPosition = 'center';
+                }
+            });
+        }
+        
+        // 初始化页面
+        initColorInputs();
+        initWallpaperOptions();
+        
+        // 颜色选择器事件
+        primaryColorInput.addEventListener('input', function() {
+            this.nextElementSibling.textContent = this.value;
+        });
+        
+        secondaryColorInput.addEventListener('input', function() {
+            this.nextElementSibling.textContent = this.value;
+        });
+        
+        accentColorInput.addEventListener('input', function() {
+            this.nextElementSibling.textContent = this.value;
+        });
+        
+        // 壁纸选项点击事件
+        wallpaperOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                wallpaperOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                const type = this.getAttribute('data-type');
+                const value = this.getAttribute('data-value');
+                
+                if (type === 'custom' && value === 'custom') {
+                    wallpaperUpload.click();
+                }
+            });
+        });
+        
+        // 上传壁纸按钮点击事件
+        uploadWallpaperBtn.addEventListener('click', function() {
+            wallpaperUpload.click();
+        });
+        
+        // 壁纸文件上传事件
+        wallpaperUpload.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const customOption = document.querySelector('.wallpaper-option[data-type="custom"]');
+                    const preview = customOption.querySelector('.wallpaper-preview');
+                    
+                    preview.innerHTML = '';
+                    preview.style.backgroundImage = `url(${e.target.result})`;
+                    preview.style.backgroundSize = 'cover';
+                    preview.style.backgroundPosition = 'center';
+                    
+                    wallpaperOptions.forEach(opt => opt.classList.remove('active'));
+                    customOption.classList.add('active');
+                    
+                    // 临时保存自定义壁纸
+                    currentTheme.customWallpaper = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // 保存主题设置
+        saveThemeBtn.addEventListener('click', function() {
+            // 获取当前选中的壁纸选项
+            const activeWallpaper = document.querySelector('.wallpaper-option.active');
+            
+            // 更新主题设置
+            currentTheme.primaryColor = primaryColorInput.value;
+            currentTheme.secondaryColor = secondaryColorInput.value;
+            currentTheme.accentColor = accentColorInput.value;
+            
+            // 获取壁纸设置
+            currentTheme.wallpaperType = activeWallpaper.getAttribute('data-type');
+            currentTheme.wallpaperValue = activeWallpaper.getAttribute('data-value');
+            
+            // 保存主题设置到localStorage
+            localStorage.setItem('siteTheme', JSON.stringify(currentTheme));
+            
+            // 显示保存成功消息
+            showMessage('主题设置已保存', 'success');
+            
+            // 应用主题到当前页面
+            applyTheme(currentTheme);
+        });
+        
+        // 预览主题设置
+        previewThemeBtn.addEventListener('click', function() {
+            // 获取当前输入的主题设置
+            const previewTheme = {
+                primaryColor: primaryColorInput.value,
+                secondaryColor: secondaryColorInput.value,
+                accentColor: accentColorInput.value,
+                wallpaperType: document.querySelector('.wallpaper-option.active').getAttribute('data-type'),
+                wallpaperValue: document.querySelector('.wallpaper-option.active').getAttribute('data-value'),
+                customWallpaper: currentTheme.customWallpaper
+            };
+            
+            // 应用预览主题
+            applyTheme(previewTheme);
+            
+            // 显示预览消息
+            showMessage('正在预览主题设置，点击保存以应用', 'info');
+        });
+        
+        // 重置主题设置
+        resetThemeBtn.addEventListener('click', function() {
+            // 重置为默认主题
+            currentTheme = {...defaultTheme};
+            
+            // 更新UI
+            initColorInputs();
+            initWallpaperOptions();
+            
+            // 应用默认主题
+            applyTheme(currentTheme);
+            
+            // 显示重置消息
+            showMessage('主题设置已重置为默认值', 'info');
+        });
+    }
+    
+    // 应用主题到页面
+    function applyTheme(theme) {
+        // 创建或获取主题样式元素
+        let themeStyle = document.getElementById('dynamic-theme');
+        if (!themeStyle) {
+            themeStyle = document.createElement('style');
+            themeStyle.id = 'dynamic-theme';
+            document.head.appendChild(themeStyle);
+        }
+        
+        // 生成CSS变量
+        let css = `:root {
+            --primary-color: ${theme.primaryColor};
+            --primary-dark: ${adjustColor(theme.primaryColor, -20)};
+            --secondary-color: ${theme.secondaryColor};
+            --accent-color: ${theme.accentColor};
+        }`;
+        
+        // 添加壁纸样式
+        if (theme.wallpaperType === 'gradient') {
+            if (theme.wallpaperValue === 'default') {
+                css += `
+                body {
+                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                }`;
+            } else if (theme.wallpaperValue === 'sunset') {
+                css += `
+                body {
+                    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+                }`;
+            } else if (theme.wallpaperValue === 'ocean') {
+                css += `
+                body {
+                    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+                }`;
+            }
+        } else if (theme.wallpaperType === 'solid') {
+            css += `
+            body {
+                background: ${theme.wallpaperValue};
+            }`;
+        } else if (theme.wallpaperType === 'custom' && theme.customWallpaper) {
+            css += `
+            body {
+                background-image: url(${theme.customWallpaper});
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+            }`;
+        }
+        
+        // 应用样式
+        themeStyle.textContent = css;
+    }
+    
+    // 辅助函数：调整颜色亮度
+    function adjustColor(color, amount) {
+        return color;
+    }
+    
+    // 显示消息
+    function showMessage(text, type) {
+        // 创建消息元素
+        const message = document.createElement('div');
+        message.className = `theme-message ${type}`;
+        message.textContent = text;
+        
+        // 添加到页面
+        document.body.appendChild(message);
+        
+        // 自动消失
+        setTimeout(() => {
+            message.classList.add('fade-out');
+            setTimeout(() => {
+                document.body.removeChild(message);
+            }, 500);
+        }, 3000);
+    }
+    
+    // 检查登录状态并设置通用元素
+    function checkLoginAndSetupCommon() {
+        // 检查登录状态
+        if (!localStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        // 显示用户名
+        const usernameElement = document.getElementById('admin-username');
+        if (usernameElement) {
+            usernameElement.textContent = localStorage.getItem('adminUsername');
+        }
+        
+        // 退出登录
+        const logoutButton = document.querySelector('.logout');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminUsername');
+                window.location.href = 'login.html';
+            });
+        }
+        
+        return true;
     }
     
     // 后台主页逻辑
