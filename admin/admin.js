@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 管理员凭据（实际应用中应该使用后端验证）
     const adminCredentials = {
-        username: 'admin',
-        password: 'admin123'
+        username: 'xzqmn',
+        password: 'x84907621'
     };
     
     // 登录页面逻辑
