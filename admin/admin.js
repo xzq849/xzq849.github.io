@@ -99,6 +99,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 应用样式
         themeStyle.textContent = css;
+        
+        // 保存主题设置到localStorage，使前台页面也能应用
+        localStorage.setItem('siteTheme', JSON.stringify(theme));
     }
     
     // 辅助函数：调整颜色亮度
@@ -325,112 +328,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 应用主题到页面
-    function applyTheme(theme) {
-        // 创建或获取主题样式元素
-        let themeStyle = document.getElementById('dynamic-theme');
-        if (!themeStyle) {
-            themeStyle = document.createElement('style');
-            themeStyle.id = 'dynamic-theme';
-            document.head.appendChild(themeStyle);
-        }
-        
-        // 生成CSS变量
-        let css = `:root {
-            --primary-color: ${theme.primaryColor};
-            --primary-dark: ${adjustColor(theme.primaryColor, -20)};
-            --secondary-color: ${theme.secondaryColor};
-            --accent-color: ${theme.accentColor};
-        }`;
-        
-        // 添加壁纸样式
-        if (theme.wallpaperType === 'gradient') {
-            if (theme.wallpaperValue === 'default') {
-                css += `
-                body {
-                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                }`;
-            } else if (theme.wallpaperValue === 'sunset') {
-                css += `
-                body {
-                    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-                }`;
-            } else if (theme.wallpaperValue === 'ocean') {
-                css += `
-                body {
-                    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-                }`;
-            }
-        } else if (theme.wallpaperType === 'solid') {
-            css += `
-            body {
-                background: ${theme.wallpaperValue};
-            }`;
-        } else if (theme.wallpaperType === 'custom' && theme.customWallpaper) {
-            css += `
-            body {
-                background-image: url(${theme.customWallpaper});
-                background-size: cover;
-                background-position: center;
-                background-attachment: fixed;
-            }`;
-        }
-        
-        // 应用样式
-        themeStyle.textContent = css;
-    }
-    
     // 辅助函数：调整颜色亮度
     function adjustColor(color, amount) {
-        return color;
+        return '#' + color.replace(/^#/, '').replace(/../g, color => {
+            const num = Math.min(255, Math.max(0, parseInt(color, 16) + amount));
+            return num.toString(16).padStart(2, '0');
+        });
     }
     
-    // 显示消息
-    function showMessage(text, type) {
-        // 创建消息元素
-        const message = document.createElement('div');
-        message.className = `theme-message ${type}`;
-        message.textContent = text;
-        
-        // 添加到页面
-        document.body.appendChild(message);
-        
-        // 自动消失
-        setTimeout(() => {
-            message.classList.add('fade-out');
-            setTimeout(() => {
-                document.body.removeChild(message);
-            }, 500);
-        }, 3000);
-    }
+    // 显示消息函数已在前面定义，这里不需要重复定义
     
-    // 检查登录状态并设置通用元素
-    function checkLoginAndSetupCommon() {
-        // 检查登录状态
-        if (!localStorage.getItem('adminLoggedIn')) {
-            window.location.href = 'login.html';
-            return false;
-        }
-        
-        // 显示用户名
-        const usernameElement = document.getElementById('admin-username');
-        if (usernameElement) {
-            usernameElement.textContent = localStorage.getItem('adminUsername');
-        }
-        
-        // 退出登录
-        const logoutButton = document.querySelector('.logout');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                localStorage.removeItem('adminLoggedIn');
-                localStorage.removeItem('adminUsername');
-                window.location.href = 'login.html';
-            });
-        }
-        
-        return true;
-    }
+    // 检查登录状态并设置通用元素函数已在前面定义，这里不需要重复定义
     
     // 后台主页逻辑
     if (currentPage === 'index.html' || currentPage === '') {
