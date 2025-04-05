@@ -5,51 +5,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const engineLogo = document.getElementById('engine-logo');
     const engineDescription = document.getElementById('engine-description');
     
-    // 搜索引擎配置
-    const searchEngines = {
-        google: {
-            name: 'Google',
-            url: 'https://www.google.com/search',
-            param: 'q',
-            logo: './Logo/google.svg',
-            description: 'Google 是全球最大的搜索引擎，提供网页、图片、视频等多种搜索服务。'
-        },
-        baidu: {
-            name: '百度',
-            url: 'https://www.baidu.com/s',
-            param: 'wd',
-            logo: './Logo/baidu.svg',
-            description: '百度是中国最大的搜索引擎，提供网页、贴吧、知道等多种服务。'
-        },
-        bing: {
-            name: 'Bing',
-            url: 'https://www.bing.com/search',
-            param: 'q',
-            logo: './Logo/Bing.png',
-            description: 'Bing 是微软推出的搜索引擎，提供网页、图片、视频等多种搜索服务。'
-        },
-        github: {
-            name: 'GitHub',
-            url: 'https://github.com/search',
-            param: 'q',
-            logo: './Logo/github.png',
-            description: 'GitHub 是全球最大的代码托管平台，可以搜索开源项目和代码。'
-        },
-        bilibili: {
-            name: '哔哩哔哩',
-            url: 'https://search.bilibili.com/all',
-            param: 'keyword',
-            logo: './Logo/bilibili.svg',
-            description: '哔哩哔哩是中国知名的视频弹幕网站，提供动画、游戏、音乐等内容。'
-        },
-        yandex: {
-            name: 'Yandex',
-            url: 'https://yandex.com/search/',
-            param: 'text',
-            logo: './Logo/yandex.svg',
-            description: 'Yandex 是俄罗斯最大的搜索引擎，提供网页、图片、视频等多种搜索服务。'
-        }
-    };
+    // 从localStorage获取搜索引擎配置，如果没有则使用默认配置
+    let searchEngines = JSON.parse(localStorage.getItem('searchEngines'));
+    
+    // 默认搜索引擎配置
+    if (!searchEngines) {
+        searchEngines = {
+            google: {
+                name: 'Google',
+                url: 'https://www.google.com/search',
+                param: 'q',
+                logo: './Logo/google.svg',
+                description: 'Google 是全球最大的搜索引擎，提供网页、图片、视频等多种搜索服务。'
+            },
+            baidu: {
+                name: '百度',
+                url: 'https://www.baidu.com/s',
+                param: 'wd',
+                logo: './Logo/baidu.svg',
+                description: '百度是中国最大的搜索引擎，提供网页、贴吧、知道等多种服务。'
+            },
+            bing: {
+                name: 'Bing',
+                url: 'https://www.bing.com/search',
+                param: 'q',
+                logo: './Logo/Bing.png',
+                description: 'Bing 是微软推出的搜索引擎，提供网页、图片、视频等多种搜索服务。'
+            },
+            github: {
+                name: 'GitHub',
+                url: 'https://github.com/search',
+                param: 'q',
+                logo: './Logo/github.png',
+                description: 'GitHub 是全球最大的代码托管平台，可以搜索开源项目和代码。'
+            },
+            bilibili: {
+                name: '哔哩哔哩',
+                url: 'https://search.bilibili.com/all',
+                param: 'keyword',
+                logo: './Logo/bilibili.svg',
+                description: '哔哩哔哩是中国知名的视频弹幕网站，提供动画、游戏、音乐等内容。'
+            },
+            yandex: {
+                name: 'Yandex',
+                url: 'https://yandex.com/search/',
+                param: 'text',
+                logo: './Logo/yandex.svg',
+                description: 'Yandex 是俄罗斯最大的搜索引擎，提供网页、图片、视频等多种搜索服务。'
+            }
+        };
+        
+        // 保存默认配置到localStorage
+        localStorage.setItem('searchEngines', JSON.stringify(searchEngines));
+    }
     
     // 设置当前搜索引擎
     let currentEngine = 'google';

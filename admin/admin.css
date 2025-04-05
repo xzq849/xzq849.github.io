@@ -1,0 +1,237 @@
+/* 后台管理系统样式 */
+.admin-container {
+    max-width: 1000px;
+}
+
+/* 登录页面样式 */
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    color: #666;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #4285f4;
+    outline: none;
+}
+
+#login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+#login-button:hover {
+    background-color: #3367d6;
+}
+
+.message {
+    text-align: center;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+
+.message.error {
+    display: block;
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.message.success {
+    display: block;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+/* 后台主界面样式 */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+}
+
+.admin-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.admin-nav a:hover, .admin-nav a.active {
+    background-color: #f0f0f0;
+}
+
+.admin-nav a.logout {
+    color: #e53935;
+}
+
+.admin-content {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 搜索引擎管理表格 */
+.engines-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.engines-table th, .engines-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.engines-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.engines-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+}
+
+.action-buttons button:hover {
+    background-color: #f0f0f0;
+}
+
+.action-buttons .edit {
+    color: #4285f4;
+}
+
+.action-buttons .delete {
+    color: #e53935;
+}
+
+/* 添加/编辑搜索引擎表单 */
+.engine-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.engine-form h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.form-actions .save {
+    background-color: #4285f4;
+    color: white;
+}
+
+.form-actions .save:hover {
+    background-color: #3367d6;
+}
+
+.form-actions .cancel {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.form-actions .cancel:hover {
+    background-color: #e0e0e0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .engines-table {
+        font-size: 0.9rem;
+    }
+    
+    .engines-table th, .engines-table td {
+        padding: 8px 10px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
