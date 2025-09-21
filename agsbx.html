@@ -15,10 +15,11 @@
       --ok:#22c55e;
       --warn:#f59e0b;
       --err:#ef4444;
-      --input-bg:#0d1430;
+      --input-bg:#070e20;
       --button-bg-dark:#1a2346;
       --button-bg-light:#121a39;
       --body-bg: linear-gradient(180deg, var(--bg) 0%, #0e1530 100%);
+      color-scheme: dark;
     }
     .light-mode {
       --bg:#ffffff;
@@ -30,10 +31,11 @@
       --ok:#22c55e;
       --warn:#f59e0b;
       --err:#ef4444;
-      --input-bg:#ffffff;
+      --input-bg:#f7fafc;
       --button-bg-dark:#e2e8f0;
       --button-bg-light:#f0f4f9;
       --body-bg: var(--bg);
+      color-scheme: light;
     }
     * {
       box-sizing: border-box;
@@ -240,9 +242,36 @@
       transition: background-color 0.3s, border-color 0.3s, color 0.3s;
       font-feature-settings: "liga" 1, "kern" 1;
       letter-spacing: .1px;
+      caret-color: var(--ink);
+      -webkit-text-fill-color: var(--ink);
     }
-    ::placeholder { color: color-mix(in oklab, var(--ink) 55%, transparent); opacity: .8; }
-    .light-mode ::placeholder { color: color-mix(in oklab, var(--ink) 50%, transparent); opacity: .9; }
+    /* 覆盖浏览器自动填充，保证暗/亮模式文字与底色对比清晰 */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--ink);
+      caret-color: var(--ink);
+      transition: background-color 9999s ease-in-out 0s; /* 延迟绘制以覆盖默认黄色 */
+      box-shadow: 0 0 0 1000px var(--input-bg) inset;
+      -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+    }
+    /* 输入框/文本域的文本选择高亮：在夜间/日间都保持可见 */
+    input::selection, textarea::selection {
+      background: color-mix(in oklab, var(--acc) 55%, transparent);
+      color: var(--ink);
+    }
+    .light-mode input::selection, .light-mode textarea::selection {
+      background: color-mix(in oklab, var(--acc) 60%, #fff);
+      color: var(--ink);
+    }
+    ::placeholder { color: color-mix(in oklab, var(--ink) 48%, transparent); opacity: .75; }
+    .light-mode ::placeholder { color: color-mix(in oklab, var(--ink) 58%, transparent); opacity: .9; }
     input[disabled] {
       opacity: .5;
       cursor: not-allowed;
@@ -427,8 +456,13 @@
        /* 不使用 overflow:hidden 保留按钮悬浮阴影的外溢可见性 */
      }
      .light-mode .input-with-button {
-       background: var(--card);
-     }
+      background: var(--card);
+    }
+    .light-mode .input-with-button input[type="text"] {
+      color: var(--ink);
+      caret-color: var(--ink);
+      -webkit-text-fill-color: var(--ink);
+    }
      .input-with-button input[type="text"] {
        flex: 1;
        min-width: 0;
@@ -436,6 +470,9 @@
        border-radius: 12px 0 0 12px; /* 左侧外圆角 */
        background: transparent;
        padding: 10px 12px;
+       color: var(--ink);
+       caret-color: var(--ink);
+       -webkit-text-fill-color: var(--ink);
      }
      .input-with-button button {
        width: auto;
@@ -944,7 +981,15 @@
     .light-mode textarea:focus-visible {
       outline: none;
       border-color: #5a73c9;
-      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.55);
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.6);
+    }
+    /* 暗色模式：更亮的聚焦描边与外环，易于捕捉焦点 */
+    body:not(.light-mode) input:focus-visible,
+    body:not(.light-mode) select:focus-visible,
+    body:not(.light-mode) textarea:focus-visible {
+      outline: none;
+      border-color: color-mix(in oklab, var(--acc) 82%, #fff);
+      box-shadow: 0 0 0 3px rgba(79,124,255,.35);
     }
 
     /* 小屏或触屏设备：降低投影强度，保持拟物但避免阴影过重 */
