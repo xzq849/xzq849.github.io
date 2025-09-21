@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Argosbx一键SSH命令生成器</title>
+  <style>
+    :root {
+      --bg:#0b1020;
+      --card:#121831;
+      --ink:#e9edf7;
+      --sub:#b7c1d9;
+      --line:#263255;
+      --acc:#4f7cff;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --err:#ef4444;
+      --input-bg:#0d1430;
+      --button-bg-dark:#1a2346;
+      --button-bg-light:#121a39;
+      --body-bg: linear-gradient(180deg, var(--bg) 0%, #0e1530 100%);
+    }
+    .light-mode {
+      --bg:#ffffff;
+      --card:#ffffff;
+      --ink:#1a202c;
+      --sub:#4a5568;
+      --line:#e2e8f0;
+      --acc:#4f7cff;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --err:#ef4444;
+      --input-bg:#ffffff;
+      --button-bg-dark:#e2e8f0;
+      --button-bg-light:#f0f4f9;
+      --body-bg: var(--bg);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: var(--body-bg);
+      color: var(--ink);
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans CJK SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", "WenQuanYi Micro Hei", "Heiti SC", sans-serif;
+      font-kerning: normal;
+      font-variant-ligatures: common-ligatures contextual;
+      font-synthesis: none; /* 避免伪粗体/伪斜体导致笔画发糊 */
+      font-optical-sizing: auto;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    header {
+      position: relative;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    header h1 {
+      font-size: 36px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    header p {
+      margin: 0;
+      font-size: 14.5px;
+      color: var(--sub);
+      line-height: 1.8;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      letter-spacing: .1px;
+    }
+    a {
+      color: var(--acc);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ::selection {
+      background: rgba(79,124,255,.35);
+      color: #fff;
+    }
+    .light-mode ::selection {
+      background: rgba(79,124,255,.25);
+      color: #1a202c;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 16px;
+    }
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+      }
+    }
+    .protocol-port {
+      grid-column: 1;
+      grid-row: 1 / 3;
+    }
+    .outbound-warp {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .argo-tunnel {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    .shortcut-commands-card {
+      grid-column: 1 / 3;
+      grid-row: 3;
+    }
+    .out {
+      grid-column: 1 / 3;
+      grid-row: 4;
+    }
+    .card {
+      background: rgba(255, 255, 255, .04);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    /* 毛玻璃增强：仅作用于 section.card，避免影响非 section 的 .card 元素 */
+     section.card {
+       background: rgba(255, 255, 255, 0.06);
+       backdrop-filter: saturate(180%) blur(11px);
+       -webkit-backdrop-filter: saturate(180%) blur(11px);
+       box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.22);
+     }
+     .light-mode section.card {
+       background: rgba(255, 255, 255, 0.70);
+       backdrop-filter: saturate(160%) blur(9px);
+       -webkit-backdrop-filter: saturate(160%) blur(9px);
+       box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 6px 18px rgba(0,0,0,.08);
+     }
+    .light-mode .card {
+      background: var(--card);
+      border-color: var(--line);
+    }
+    .card:hover {
+      background: rgba(255,255,255,.06);
+      border-color: #33406a;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .light-mode .card:hover {
+      background: #f8fafc;
+      border-color: #c9d3e3;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      color: var(--ink);
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: .15px;
+      color: var(--ink);
+    }
+    .card p { margin: 0 0 10px; }
+    .protocol-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px; /* 为每个协议项添加一些垂直间距 */
+    }
+    .protocol-item label {
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .protocol-item input[type="text"] {
+      flex-grow: 1; /* 让输入框填充剩余空间 */
+      min-width: 100px; /* 确保在小屏幕下也有足够的宽度 */
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--ink);
+      outline: none;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    /* 新增的网格布局，用于完美对齐 */
+    .protocol-grid {
+      display: grid;
+      grid-template-columns: auto 1fr; /* 第一列自动宽度，第二列填充剩余空间 */
+      gap: 8px 12px; /* 行间距8px，列间距12px */
+      align-items: center;
+    }
+    .protocol-grid .protocol-item {
+      margin: 0; /* 在网格布局中，移除protocol-item的外部间距 */
+    }
+
+    .row:not(.protocol-port .row) {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 8px 0;
+    }
+    @media (max-width: 600px) {
+      .row:not(.protocol-port .row) {
+        grid-template-columns: 1fr;
+      }
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--ink);
+      outline: none;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+      font-feature-settings: "liga" 1, "kern" 1;
+      letter-spacing: .1px;
+    }
+    ::placeholder { color: color-mix(in oklab, var(--ink) 55%, transparent); opacity: .8; }
+    .light-mode ::placeholder { color: color-mix(in oklab, var(--ink) 50%, transparent); opacity: .9; }
+    input[disabled] {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      background: #263255;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .light-mode .switch {
+      background: var(--sub);
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      inset: 3px auto 3px 3px;
+      width: 22px;
+      border-radius: 50%;
+      background: white;
+      transition: .2s;
+    }
+    .switch.on {
+      background: var(--acc);
+    }
+    .switch.on::after {
+      left: auto;
+      right: 3px;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 12.5px;
+      line-height: 1.9;
+      letter-spacing: .1px;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--sub);
+      margin-left: 6px;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      cursor: pointer;
+      border: 1px solid var(--line);
+      /* 毛玻璃半透明渐变，暗色主题 */
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      backdrop-filter: saturate(140%) blur(8px);
+      -webkit-backdrop-filter: saturate(140%) blur(8px);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: background 0.3s, color 0.3s, border-color 0.3s, transform .2s ease, box-shadow .2s ease;
+      /* 初始轻微内阴影，拟物高光和底部阴影 */
+      box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.22) inset;
+      will-change: transform, box-shadow;
+      font-size: 14.5px;
+      letter-spacing: .1px;
+    }
+    button:hover {
+      transform: translateY(-2px) scale(1.01);
+      /* 悬浮外投影叠加内阴影，保持拟物质感 */
+      box-shadow: 0 10px 18px rgba(0,0,0,.24), 0 3px 8px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.22) inset;
+    }
+    button:active {
+      transform: translateY(0) scale(.995);
+      /* 回落时外投影减弱，内阴影略保留模拟凹陷态 */
+      box-shadow: 0 4px 10px rgba(0,0,0,.16), 0 1px 0 rgba(255,255,255,.05) inset, 0 -1px 0 rgba(0,0,0,.22) inset, inset 0 2px 6px rgba(0,0,0,.16);
+    }
+    /* 明亮主题下的毛玻璃按钮：更明亮的半透明渐变与内阴影 */
+    .light-mode button {
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.75));
+      backdrop-filter: saturate(160%) blur(10px);
+      -webkit-backdrop-filter: saturate(160%) blur(10px);
+      box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.9) inset, 0 -1px 0 rgba(0,0,0,.08) inset;
+    }
+    button:hover {
+      transform: translateY(-2px) scale(1.01);
+      /* 悬浮外投影叠加内阴影，保持拟物质感 */
+      box-shadow: 0 10px 18px rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.22), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.25) inset;
+    }
+    button:active {
+      transform: translateY(0) scale(.995);
+      /* 回落时外投影减弱，内阴影略保留模拟凹陷态 */
+      box-shadow: 0 4px 10px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.05) inset, 0 -1px 0 rgba(0,0,0,.25) inset, inset 0 2px 6px rgba(0,0,0,.18);
+    }
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79,124,255,.35), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.25) inset;
+    }
+    /* 主按钮（蓝色）做半透明蓝色拟物 + 毛玻璃 */
+    button.primary {
+      background: linear-gradient(180deg, rgba(79,124,255,.85), rgba(56,95,223,.75));
+      border-color: rgba(79,124,255,.7);
+      color: #fff;
+      backdrop-filter: saturate(160%) blur(8px);
+      -webkit-backdrop-filter: saturate(160%) blur(8px);
+    }
+    button.ghost {
+      background: transparent;
+    }
+    .out {
+      position: relative;
+    }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      background: #0a1128;
+      color: #dbeafe;
+      border: 1px dashed #3752a6;
+      border-radius: 12px;
+      padding: 12px;
+      white-space: pre;
+      resize: vertical;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .light-mode textarea {
+      background: #f0f4f9;
+      color: #1a202c;
+      border-color: #929faf;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    .tab {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      cursor: pointer;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .tab.active {
+      border-color: #5a73c9;
+      color: var(--ink);
+      background: rgba(79, 124, 255, .15);
+    }
+    .shortcut-commands-content {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .shortcut-commands-content p {
+      margin: 0;
+      white-space: nowrap;
+    }
+    .shortcut-commands-content .command-button {
+      background: var(--button-bg-dark);
+      color: var(--ink);
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .shortcut-commands-content .command-button:hover {
+      background: var(--line);
+    }
+    /* 一体化 input+button */
+    .input-with-button {
+       display: flex;
+       flex-direction: row; /* 横向：输入在左，按钮在右 */
+       align-items: stretch;
+       gap: 0; /* 无缝：去除内部间距 */
+       padding: 0; /* 无缝：去除容器内边距 */
+       border: 1px solid var(--line);
+       border-radius: 12px;
+       background: var(--input-bg);
+       /* 不使用 overflow:hidden 保留按钮悬浮阴影的外溢可见性 */
+     }
+     .light-mode .input-with-button {
+       background: var(--card);
+     }
+     .input-with-button input[type="text"] {
+       flex: 1;
+       min-width: 0;
+       border: none;
+       border-radius: 12px 0 0 12px; /* 左侧外圆角 */
+       background: transparent;
+       padding: 10px 12px;
+     }
+     .input-with-button button {
+       width: auto;
+       padding: 10px 14px;
+       font-size: 14px;
+       white-space: nowrap;
+       border: none; /* 由容器统一边框管理 */
+       border-radius: 12px; /* 四个角都为圆角 */
+       margin: 0;
+       margin-left: -1px; /* 轻微覆盖接缝，确保完全无缝 */
+       align-self: stretch; /* 与容器同高 */
+       position: relative; /* 建立层叠上下文，便于遮罩 */
+       z-index: 1; /* 确保覆盖接缝处 */
+     }
+     /* 左侧细缝进一步处理：在按钮左侧叠一条内向渐变遮罩（随主题适配） */
+     .input-with-button button::after {
+       content: "";
+       position: absolute;
+       left: -1px; top: 0; bottom: 0;
+       width: 2px;
+       pointer-events: none;
+       background: linear-gradient(to right, var(--input-bg), rgba(0,0,0,0));
+     }
+     .light-mode .input-with-button button::after {
+       background: linear-gradient(to right, var(--card), rgba(0,0,0,0));
+     }
+     /* 当输入框获得焦点时，关闭容器外环（不影响按钮的焦点外环） */
+     .input-with-button.silent-focus { box-shadow: none !important; }
+     .light-mode .input-with-button.silent-focus { box-shadow: none !important; }
+     /* 禁止输入框自身的 outline/阴影 */
+     .input-with-button input[type="text"]:focus,
+     .input-with-button input[type="text"]:focus-visible { outline: none; box-shadow: none; }
+     .input-with-button:focus-within {
+       outline: none;
+       box-shadow: 0 0 0 3px rgba(79,124,255,.35);
+     }
+     .light-mode .input-with-button:focus-within {
+       box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.55);
+     }
+     /* —— 追加覆盖：在该组件内“全部禁用外环” —— */
+     .input-with-button:focus-within { box-shadow: none !important; }
+     .light-mode .input-with-button:focus-within { box-shadow: none !important; }
+     .input-with-button button:focus,
+     .input-with-button button:focus-visible { outline: none !important; box-shadow: none !important; }
+     .light-mode .input-with-button button:focus-visible { box-shadow: none !important; }
+    /* 删除旧版横向容器遗留：避免覆盖上方新规则 */
+    /* .input-with-button input[type="text"] { flex: 1; border-radius: 10px; } */
+    /* .input-with-button button { padding: 8px 12px; font-size: 14px; white-space: nowrap; border-radius: 10px; margin-left: 0; align-self: center; } */
+    .protocol-group {
+      margin-bottom: 16px;
+    }
+    .protocol-group.separator {
+      border-bottom: 1px dotted var(--line);
+      padding-bottom: 16px;
+    }
+    .theme-switch {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+      padding: 10px;
+    }
+    .theme-switch-icon {
+       width: 24px;
+       height: 24px;
+       cursor: pointer;
+       color: var(--ink);
+       transition: transform .35s ease, color .25s ease, filter .25s ease;
+     }
+     .theme-switch-checkbox {
+       display: none;
+     }
+     .theme-switch-label {
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+       width: 40px;
+       height: 40px;
+       border-radius: 999px;
+       cursor: pointer;
+       transition: background-color .25s ease;
+     }
+     .theme-switch-label:hover { background: rgba(255,255,255,.08); }
+     .light-mode .theme-switch-label:hover { background: rgba(0,0,0,.06); }
+     /* 暗色：作为“月亮”，默认方向 */
+     body:not(.light-mode) .theme-switch-icon {
+       color: var(--ink);
+       filter: drop-shadow(0 0 6px rgba(79,124,255,.35));
+       transform: rotate(0deg);
+     }
+     /* 亮色：作为“太阳”，旋转并用暖色强调 */
+     .light-mode .theme-switch-icon {
+       color: #f59e0b;
+       filter: drop-shadow(0 0 6px rgba(245,158,11,.45));
+       transform: rotate(180deg);
+     }
+     /* 按下时的轻微按压反馈（不影响切换旋转的最终状态） */
+     body:not(.light-mode) .theme-switch-label:active .theme-switch-icon { transform: scale(0.9); }
+     .light-mode .theme-switch-label:active .theme-switch-icon { transform: rotate(180deg) scale(0.9); }
+    .command-type-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .command-type-row label {
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    /* 浅色模式：更高对比度的 focus-visible 描边，便于键盘导航 */
+    .light-mode button:focus-visible {
+      outline: none;
+      /* 双层高对比可见环（白色内环+主题色外环），在浅色背景上更明显 */
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.6), 0 1px 0 rgba(255,255,255,.9) inset, 0 -1px 0 rgba(0,0,0,.08) inset;
+    }
+    .light-mode input:focus-visible,
+    .light-mode select:focus-visible,
+    .light-mode textarea:focus-visible {
+      outline: none;
+      border-color: var(--line);
+      box-shadow: none;
+    }
+    /* 全局：禁用输入类元素焦点外环（暗/亮通用） */
+    input:focus,
+    input:focus-visible,
+    select:focus,
+    select:focus-visible,
+    textarea:focus,
+    textarea:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    .light-mode .card {
+      background: var(--card);
+      border-color: var(--line);
+    }
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      color: var(--ink);
+    }
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .protocol-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px; /* 为每个协议项添加一些垂直间距 */
+    }
+    .protocol-item label {
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .protocol-item input[type="text"] {
+      flex-grow: 1; /* 让输入框填充剩余空间 */
+      min-width: 100px; /* 确保在小屏幕下也有足够的宽度 */
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--ink);
+      outline: none;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    /* 新增的网格布局，用于完美对齐 */
+    .protocol-grid {
+      display: grid;
+      grid-template-columns: auto 1fr; /* 第一列自动宽度，第二列填充剩余空间 */
+      gap: 8px 12px; /* 行间距8px，列间距12px */
+      align-items: center;
+    }
+    .protocol-grid .protocol-item {
+      margin: 0; /* 在网格布局中，移除protocol-item的外部间距 */
+    }
+
+    .row:not(.protocol-port .row) {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 8px 0;
+    }
+    @media (max-width: 600px) {
+      .row:not(.protocol-port .row) {
+        grid-template-columns: 1fr;
+      }
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--ink);
+      outline: none;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    input[disabled] {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      background: #263255;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .light-mode .switch {
+      background: var(--sub);
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      inset: 3px auto 3px 3px;
+      width: 22px;
+      border-radius: 50%;
+      background: white;
+      transition: .2s;
+    }
+    .switch.on {
+      background: var(--acc);
+    }
+    .switch.on::after {
+      left: auto;
+      right: 3px;
+    }
+    .pill {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--sub);
+      margin-left: 6px;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      cursor: pointer;
+      border: 1px solid var(--line);
+      /* 毛玻璃半透明渐变，暗色主题 */
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      backdrop-filter: saturate(140%) blur(8px);
+      -webkit-backdrop-filter: saturate(140%) blur(8px);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: background 0.3s, color 0.3s, border-color 0.3s, transform .2s ease, box-shadow .2s ease;
+      /* 初始轻微内阴影，拟物高光和底部阴影 */
+      box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.25) inset;
+      will-change: transform, box-shadow;
+    }
+    /* 明亮主题下的毛玻璃按钮：更明亮的半透明渐变与内阴影 */
+    .light-mode button {
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.75));
+      backdrop-filter: saturate(160%) blur(10px);
+      -webkit-backdrop-filter: saturate(160%) blur(10px);
+      box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.9) inset, 0 -1px 0 rgba(0,0,0,.08) inset;
+    }
+    button:hover {
+      transform: translateY(-2px) scale(1.01);
+      /* 悬浮外投影叠加内阴影，保持拟物质感 */
+      box-shadow: 0 10px 18px rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.22), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.25) inset;
+    }
+    button:active {
+      transform: translateY(0) scale(.995);
+      /* 回落时外投影减弱，内阴影略保留模拟凹陷态 */
+      box-shadow: 0 4px 10px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.05) inset, 0 -1px 0 rgba(0,0,0,.25) inset, inset 0 2px 6px rgba(0,0,0,.18);
+    }
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79,124,255,.35), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.25) inset;
+    }
+    /* 主按钮（蓝色）做半透明蓝色拟物 + 毛玻璃 */
+    button.primary {
+      background: linear-gradient(180deg, rgba(79,124,255,.85), rgba(56,95,223,.75));
+      border-color: rgba(79,124,255,.7);
+      color: #fff;
+      backdrop-filter: saturate(160%) blur(8px);
+      -webkit-backdrop-filter: saturate(160%) blur(8px);
+    }
+    button.ghost {
+      background: transparent;
+    }
+    .out {
+      position: relative;
+    }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      background: #0a1128;
+      color: #dbeafe;
+      border: 1px dashed #3752a6;
+      border-radius: 12px;
+      padding: 12px;
+      white-space: pre;
+      resize: vertical;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .light-mode textarea {
+      background: #f0f4f9;
+      color: #1a202c;
+      border-color: #929faf;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    .tab {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      cursor: pointer;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .tab.active {
+      border-color: #5a73c9;
+      color: var(--ink);
+      background: rgba(79, 124, 255, .15);
+    }
+    .shortcut-commands-content {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .shortcut-commands-content p {
+      margin: 0;
+      white-space: nowrap;
+    }
+    .shortcut-commands-content .command-button {
+      background: var(--button-bg-dark);
+      color: var(--ink);
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .shortcut-commands-content .command-button:hover {
+      background: var(--line);
+    }
+    /* 一体化 input+button */
+    .input-with-button {
+       display: flex;
+       flex-direction: row; /* 横向：输入在左，按钮在右 */
+       align-items: stretch;
+       gap: 0; /* 无缝：去除内部间距 */
+       padding: 0; /* 无缝：去除容器内边距 */
+       border: 1px solid var(--line);
+       border-radius: 12px;
+       background: var(--input-bg);
+       /* 不使用 overflow:hidden 保留按钮悬浮阴影的外溢可见性 */
+     }
+     .light-mode .input-with-button {
+       background: var(--card);
+     }
+     .input-with-button input[type="text"] {
+       flex: 1;
+       min-width: 0;
+       border: none;
+       border-radius: 12px 0 0 12px; /* 左侧外圆角 */
+       background: transparent;
+       padding: 10px 12px;
+     }
+     .input-with-button button {
+       width: auto;
+       padding: 10px 14px;
+       font-size: 14px;
+       white-space: nowrap;
+       border: none; /* 由容器统一边框管理 */
+       border-radius: 12px; /* 四个角都为圆角 */
+       margin: 0;
+       margin-left: -1px; /* 轻微覆盖接缝，确保完全无缝 */
+       align-self: stretch; /* 与容器同高 */
+       position: relative; /* 建立层叠上下文，便于遮罩 */
+       z-index: 1; /* 确保覆盖接缝处 */
+     }
+     /* 左侧细缝进一步处理：在按钮左侧叠一条内向渐变遮罩（随主题适配） */
+     .input-with-button button::after {
+       content: "";
+       position: absolute;
+       left: -1px; top: 0; bottom: 0;
+       width: 2px;
+       pointer-events: none;
+       background: linear-gradient(to right, var(--input-bg), rgba(0,0,0,0));
+     }
+     .light-mode .input-with-button button::after {
+       background: linear-gradient(to right, var(--card), rgba(0,0,0,0));
+     }
+     /* 当输入框获得焦点时，关闭容器外环（不影响按钮的焦点外环） */
+     .input-with-button.silent-focus { box-shadow: none !important; }
+     .light-mode .input-with-button.silent-focus { box-shadow: none !important; }
+     /* 禁止输入框自身的 outline/阴影 */
+     .input-with-button input[type="text"]:focus,
+     .input-with-button input[type="text"]:focus-visible { outline: none; box-shadow: none; }
+     .input-with-button:focus-within {
+       outline: none;
+       box-shadow: 0 0 0 3px rgba(79,124,255,.35);
+     }
+     .light-mode .input-with-button:focus-within {
+       box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.55);
+     }
+     /* —— 追加覆盖：在该组件内“全部禁用外环” —— */
+     .input-with-button:focus-within { box-shadow: none !important; }
+     .light-mode .input-with-button:focus-within { box-shadow: none !important; }
+     .input-with-button button:focus,
+     .input-with-button button:focus-visible { outline: none !important; box-shadow: none !important; }
+     .light-mode .input-with-button button:focus-visible { box-shadow: none !important; }
+    /* 删除旧版横向容器遗留：避免覆盖上方新规则 */
+    /* .input-with-button input[type="text"] { flex: 1; border-radius: 10px; } */
+    /* .input-with-button button { padding: 8px 12px; font-size: 14px; white-space: nowrap; border-radius: 10px; margin-left: 0; align-self: center; } */
+    .protocol-group {
+      margin-bottom: 16px;
+    }
+    .protocol-group.separator {
+      border-bottom: 1px dotted var(--line);
+      padding-bottom: 16px;
+    }
+    .theme-switch {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+      padding: 10px;
+    }
+    .theme-switch-icon {
+       width: 24px;
+       height: 24px;
+       cursor: pointer;
+       color: var(--ink);
+       transition: transform .35s ease, color .25s ease, filter .25s ease;
+     }
+     .theme-switch-checkbox {
+       display: none;
+     }
+     .theme-switch-label {
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+       width: 40px;
+       height: 40px;
+       border-radius: 999px;
+       cursor: pointer;
+       transition: background-color .25s ease;
+     }
+     .theme-switch-label:hover { background: rgba(255,255,255,.08); }
+     .light-mode .theme-switch-label:hover { background: rgba(0,0,0,.06); }
+     /* 暗色：作为“月亮”，默认方向 */
+     body:not(.light-mode) .theme-switch-icon {
+       color: var(--ink);
+       filter: drop-shadow(0 0 6px rgba(79,124,255,.35));
+       transform: rotate(0deg);
+     }
+     /* 亮色：作为“太阳”，旋转并用暖色强调 */
+     .light-mode .theme-switch-icon {
+       color: #f59e0b;
+       filter: drop-shadow(0 0 6px rgba(245,158,11,.45));
+       transform: rotate(180deg);
+     }
+     /* 按下时的轻微按压反馈（不影响切换旋转的最终状态） */
+     body:not(.light-mode) .theme-switch-label:active .theme-switch-icon { transform: scale(0.9); }
+     .light-mode .theme-switch-label:active .theme-switch-icon { transform: rotate(180deg) scale(0.9); }
+    .command-type-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .command-type-row label {
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    /* 浅色模式：更高对比度的 focus-visible 描边，便于键盘导航 */
+    .light-mode button:focus-visible {
+      outline: none;
+      /* 双层高对比可见环（白色内环+主题色外环），在浅色背景上更明显 */
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.6), 0 1px 0 rgba(255,255,255,.9) inset, 0 -1px 0 rgba(0,0,0,.08) inset;
+    }
+    .light-mode input:focus-visible,
+    .light-mode select:focus-visible,
+    .light-mode textarea:focus-visible {
+      outline: none;
+      border-color: #5a73c9;
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(79,124,255,.55);
+    }
+
+    /* 小屏或触屏设备：降低投影强度，保持拟物但避免阴影过重 */
+    @media (max-width: 600px), (hover: none) and (pointer: coarse) {
+      button {
+        /* 更轻的基础内阴影 */
+        box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.05) inset, 0 -1px 0 rgba(0,0,0,.18) inset;
+      }
+      .light-mode button {
+        box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.8) inset, 0 -1px 0 rgba(0,0,0,.06) inset;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,.16), 0 1px 0 rgba(255,255,255,.05) inset, 0 -1px 0 rgba(0,0,0,.2) inset;
+      }
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0,0,0,.14), 0 1px 0 rgba(255,255,255,.04) inset, 0 -1px 0 rgba(0,0,0,.2) inset, inset 0 2px 4px rgba(0,0,0,.16);
+      }
+    }
+
+    /* 无障碍：减少动效偏好时，降级动画与位移动效 */
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto; }
+      .switch, button, .tab, input, select, textarea { transition: none !important; }
+      button:hover, button:active { transform: none !important; }
+      button { box-shadow: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="theme-switch">
+        <input type="checkbox" id="theme-switch-checkbox" class="theme-switch-checkbox">
+        <label for="theme-switch-checkbox" class="theme-switch-label">
+          <svg class="theme-switch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </label>
+      </div>
+      <h1>Argosbx小钢炮💣一键SSH命令生成器 V25.9.18</h1>
+      <p>
+        甬哥Github项目：
+        <a href="https://github.com/yonggekkk" target="_blank" rel="noopener noreferrer">GitHub 主页（yonggekkk）</a><br>
+        甬哥Blogger博客：
+        <a href="https://ygkkk.blogspot.com" target="_blank" rel="noopener noreferrer">个人博客（ygkkk.blogspot.com）</a><br>
+        甬哥YouTube频道：
+        <a href="https://www.youtube.com/@ygkkk" target="_blank" rel="noopener noreferrer">YouTube 频道（@ygkkk）</a><br>
+      </p>
+    </header>
+
+    <div class="grid">
+      <section class="card protocol-port">
+        <h2>必选内核协议端口：</h2>
+        <div class="protocol-group separator">
+          <h3>Xray可选协议：</h3>
+          <div class="protocol-grid">
+            <label><input type="checkbox" data-proto="vlpt"> Vless-Tcp-Reality-V <span class="pill">vlpt</span></label><input type="text" placeholder="留空则随机端口" data-port="vlpt">
+            <label><input type="checkbox" data-proto="xhpt"> Vless-Xhttp-Reality-V <span class="pill">xhpt</span></label><input type="text" placeholder="留空则随机端口" data-port="xhpt">
+            <label><input type="checkbox" data-proto="vxpt"> Vless-Xhttp-V <span class="pill">vxpt</span></label><input type="text" placeholder="留空则随机端口" data-port="vxpt">
+          </div>
+        </div>
+        <div class="protocol-group separator">
+          <h3>Singbox可选协议：</h3>
+          <div class="protocol-grid">
+            <label><input type="checkbox" data-proto="hypt"> Hysteria2 <span class="pill">hypt</span></label><input type="text" placeholder="留空则随机端口" data-port="hypt">
+            <label><input type="checkbox" data-proto="tupt"> Tuic <span class="pill">tupt</span></label><input type="text" placeholder="留空则随机端口" data-port="tupt">
+            <label><input type="checkbox" data-proto="anpt"> AnyTLS <span class="pill">anpt</span></label><input type="text" placeholder="留空则随机端口" data-port="anpt">
+            <label><input type="checkbox" data-proto="arpt"> Any-Reality <span class="pill">arpt</span></label><input type="text" placeholder="留空则随机端口" data-port="arpt">
+            <label><input type="checkbox" data-proto="sspt"> Shadowsocks-2022 <span class="pill">sspt</span></label><input type="text" placeholder="留空则随机端口" data-port="sspt">
+          </div>
+        </div>
+        <div class="protocol-group separator">
+          <h3>Xray/Singbox自动分配协议：</h3>
+          <div class="protocol-grid">
+            <label><input type="checkbox" data-proto="sopt"> Socks5 <span class="pill">sopt</span></label><input type="text" placeholder="留空则随机端口" data-port="sopt">
+            <label><input type="checkbox" data-proto="vmpt"> Vmess-ws <span class="pill">vmpt</span></label><input type="text" placeholder="留空则随机端口（Argo固定隧道需填写端口）" data-port="vmpt">
+          </div>
+        </div>
+      </section>
+
+      <section class="card outbound-warp">
+        <h2>相关配置参数： </h2>
+        <div class="row">
+          <label>UUID 密码 <span class="pill">uuid</span></label>
+          <div class="input-with-button">
+            <input id="uuid" type="text" placeholder="留空则随机生成uuid密码"/>
+            <button id="generateUuidBtn" type="button" class="primary">UUID</button>
+          </div>
+        </div>
+        <div class="row"><label>Reality 域名 <span class="pill">reym</span></label><input id="reym" type="text" placeholder="留空则默认apple.com"/></div>
+        <div class="row"><label>CF解析IP的域名<span class="pill">cdnym</span></label><input id="cdnym" type="text" placeholder="仅Vmess-ws或Vless-Xhttp-V套CDN时可用" disabled/></div>
+        <div class="row"><label>套WARP-IP出站 <span class="pill">warp</span></label>
+          <select id="warp">
+            <option value="">默认 服务器本地IP出站</option>
+            <option value="s">1、Singbox套WARP IPv4+IPv6、Xray本地IP</option>
+            <option value="s4">2、Singbox套WARP IPv4、Xray本地IP</option>
+            <option value="s6">3、Singbox套WARP IPv6、Xray本地IP</option>
+            <option value="x">4、Singbox本地IP、Xray套WARP IPv4+IPv6</option>
+            <option value="x4">5、Singbox本地IP、Xray套WARP IPv4</option>
+            <option value="x6">6、Singbox本地IP、Xray套WARP IPv6</option>
+            <option value="s4x4">7、Singbox+Xray同时套WARP IPv4</option>
+            <option value="s4x6">8、Singbox套WARP IPv4、Xray套WARP IPv6</option>
+            <option value="s6x4">9、Singbox套WARP IPv6、Xray套WARP IPv4</option>
+            <option value="s6x6">10、Singbox+Xray同时套WARP IPv6</option>
+            <option value="sx4">11、Singbox套WARP IPv4+IPv6、Xray套WARP IPv4</option>
+            <option value="sx6">12、Singbox套WARP IPv4+IPv6、Xray套WARP IPv6</option>
+            <option value="s4x">13、Singbox套WARP IPv4、Xray套WARP IPv4+IPv6</option>
+            <option value="s6x">14、Singbox套WARP IPv6、Xray套WARP IPv4+IPv6</option>
+            <option value="sx">15、Singbox+Xray同时套WARP IPv4+IPv6</option>
+          </select>
+        </div>
+        
+        <div class="row"><label>IPv4/IPv6 配置导出 <span class="pill">ippz</span></label>
+          <select id="ippz">
+            <option value="">默认 自动</option>
+            <option value="4">导出 IPv4</option>
+            <option value="6">导出 IPv6</option>
+          </select>
+        </div>
+        <div class="row"><label>导出节点名称前缀 <span class="pill">name</span></label><input id="name" type="text" placeholder="留空则默认协议名前缀"/></div>
+      </section>
+
+      <section class="card argo-tunnel">
+        <h2>Argo临时/固定隧道：</h2>
+        <div class="row">
+          <label>启用Argo <span class="pill">argo</span></label>
+          <div id="argoBtn" class="switch" role="switch" aria-checked="false"></div>
+        </div>
+        <div class="row"><label>固定隧道CF域名 <span class="pill">agn</span></label><input id="agn" type="text" placeholder="解析在CF的域名，留空则临时隧道" disabled></div>
+        <div class="row"><label>固定隧道Token <span class="pill">agk</span></label><input id="agk" type="text" placeholder="ey开头的秘钥，留空则临时隧道" disabled></div>
+      </section>
+
+      <section class="card shortcut-commands-card">
+        <h2>如已安装脚本，可用以下四个的快捷方式：</h2>
+        <div class="shortcut-commands-content">
+          <button class="command-button" data-command="list">节点显示的命令：list</button>
+          <button class="command-button" data-command="del">卸载脚本的命令：del</button>
+          <button class="command-button" data-command="res">重启脚本的命令：res</button>
+          <button class="command-button" data-command="rep">更换、添加、删除变量的命令（注:变量设置完成后再点击）：rep</button>
+        </div>
+      </section>
+
+      <section class="card out">
+        <div class="tabs">
+          <h2>进入服务器的SSH界面，复制下方生成的一键脚本命令，回车一次搞定</h2>
+        </div>
+        <div class="command-type-row">
+            <label>命令类型选择：</label>
+            <label style="margin-bottom: 0;"><input type="radio" name="commandType" value="curl" checked> curl</label>
+            <label style="margin-bottom: 0;"><input type="radio" name="commandType" value="wget"> wget</label>
+        </div>
+        <textarea id="output" spellcheck="false"></textarea>
+        <div class="actions">
+          <button id="reset">重置</button>
+          <button id="copy">复制</button>
+        </div>
+        <p style="margin-top: 10px;">相关操作及视频教程说明，请参考Argosbx小钢炮脚本项目💣：<a href="https://github.com/yonggekkk/argosbx" target="_blank" rel="noopener noreferrer">Argosbx 脚本项目</a></p>
+      </section>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // Bash命令常量
+  const CURL = 'bash <(curl -Ls https://raw.githubusercontent.com/xzq849/argosbx/main/argosbx.sh)';
+  const WGET = 'bash <(wget -qO- https://raw.githubusercontent.com/xzq849/argosbx/main/argosbx.sh)';
+  // 协议键名
+  const protoKeys = ['sopt','vmpt','vlpt','xhpt','vxpt','arpt','anpt','hypt','tupt','sspt'];
+  // 可选参数ID
+  const optIds = ['warp','ippz','uuid','reym','cdnym','name'];
+
+  // DOM元素引用
+  const argoSwitch = document.getElementById('argoBtn');
+  const agn = document.getElementById('agn');
+  const agk = document.getElementById('agk');
+  const vmessWsCheckbox = document.querySelector('[data-proto="vmpt"]');
+  const vlessXhttpCheckbox = document.querySelector('[data-proto="vxpt"]');
+  const cdnymInput = document.getElementById('cdnym');
+  const output = document.getElementById('output');
+  const allInputs = document.querySelectorAll('input, select');
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  const textInputs = document.querySelectorAll('input[type="text"]');
+  const ippzSelect = document.getElementById('ippz');
+  const generateUuidBtn = document.getElementById('generateUuidBtn');
+  const uuidInput = document.getElementById('uuid');
+  const themeSwitchCheckbox = document.getElementById('theme-switch-checkbox');
+  const commandTypeRadios = document.querySelectorAll('input[name="commandType"]');
+
+  // 初始化主题
+  function initTheme() {
+    const isLightMode = localStorage.getItem('theme') === 'light';
+    if (isLightMode) {
+      document.body.classList.add('light-mode');
+      themeSwitchCheckbox.checked = true;
+    }
+  }
+
+  // 切换主题
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const isLightMode = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+  }
+
+  // 为主题切换复选框添加事件监听器
+  themeSwitchCheckbox.addEventListener('change', toggleTheme);
+
+  /**
+   * 更新Argo隧道开关的状态和相关输入框的禁用状态。
+   * @param {boolean} isEnabled - 是否启用Argo隧道。
+   */
+  function updateArgoState(isEnabled) {
+    argoSwitch.classList.toggle('on', isEnabled);
+    argoSwitch.setAttribute('aria-checked', isEnabled ? 'true' : 'false');
+    [agn, agk].forEach(i => i.disabled = !isEnabled);
+    render();
+  }
+
+  /**
+   * 重置所有表单输入到默认状态。
+   * @param {boolean} preserveIppz - 是否保留ippz的值。
+   */
+  function resetForm(preserveIppz = false) {
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+    });
+    textInputs.forEach(inp => {
+        inp.value = '';
+    });
+    document.getElementById('warp').value = '';
+    // 如果不保留ippz，则重置其值
+    if (!preserveIppz) {
+        ippzSelect.value = '';
+    }
+    document.getElementById('uuid').value = '';
+    document.getElementById('reym').value = '';
+    document.getElementById('name').value = '';
+    updateArgoState(false);
+    updateCdnymState();
+  }
+
+  /**
+   * 根据Vmess-ws协议或VLESS-Xhttp协议的选择状态更新cdnym输入框的禁用状态。
+   */
+  function updateCdnymState() {
+      // 检查Vmess-ws或VLESS-Xhttp协议是否被选中
+      const isAnyProtocolChecked = vmessWsCheckbox.checked || vlessXhttpCheckbox.checked;
+      
+      // 如果任何一个协议被选中，则启用输入框，否则禁用它
+      cdnymInput.disabled = !isAnyProtocolChecked;
+      
+      // 如果两个协议都没有被选中，则清空输入框的值
+      if (!isAnyProtocolChecked) {
+          cdnymInput.value = '';
+      }
+      render();
+  }
+
+  // --- 事件监听器 ---
+
+  // Argo开关事件监听
+  argoSwitch.addEventListener('click', () => {
+    const on = !argoSwitch.classList.contains('on');
+    if (on) {
+      vmessWsCheckbox.checked = true;
+    }
+    updateArgoState(on);
+    updateCdnymState();
+  });
+
+  // Vmess-ws复选框事件监听
+  vmessWsCheckbox.addEventListener('change', () => {
+    if (!vmessWsCheckbox.checked) {
+      updateArgoState(false);
+    }
+    updateCdnymState();
+    render();
+  });
+  
+  // VLESS-Xhttp复选框事件监听（新增）
+  vlessXhttpCheckbox.addEventListener('change', () => {
+    updateCdnymState();
+    render();
+  });
+
+
+  // 端口输入框事件监听，如果输入了端口则自动选中对应协议
+  document.querySelectorAll('[data-port]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const key = inp.getAttribute('data-port');
+      const ck = document.querySelector(`[data-proto="${key}"]`);
+      if (!ck) return;
+      if (inp.value.trim() !== '' && !ck.checked) {
+        ck.checked = true;
+      }
+      render();
+    });
+  });
+
+  // 协议复选框事件监听，用于触发渲染
+  document.querySelectorAll('[data-proto]').forEach(ck => {
+    ck.addEventListener('change', () => {
+      // 当取消勾选时，自动清空对应的端口输入框
+      if (!ck.checked) {
+        const key = ck.getAttribute('data-proto');
+        const pt = document.querySelector(`[data-port="${key}"]`);
+        if (pt) {
+          pt.value = '';
+        }
+      }
+
+      // Vmess-ws 协议的特殊处理
+      if (ck.getAttribute('data-proto') === 'vmpt') {
+        if (!ck.checked) {
+          updateArgoState(false);
+        }
+      }
+      // 对于 Vmess-ws 和 VLESS-Xhttp，调用更新函数
+      if (ck.getAttribute('data-proto') === 'vmpt' || ck.getAttribute('data-proto') === 'vxpt') {
+          updateCdnymState();
+      }
+      render();
+    });
+  });
+
+  // UUID生成按钮事件监听
+  generateUuidBtn.addEventListener('click', () => {
+    const v = crypto.randomUUID();
+    uuidInput.value = v;
+    render();
+    showToast('已生成 UUID: ' + v);
+  });
+  
+  // 命令类型单选框事件监听
+  commandTypeRadios.forEach(radio => {
+    radio.addEventListener('change', render);
+  });
+  
+  // --- 核心功能函数 ---
+
+  /**
+   * 收集所有表单变量。
+   * @returns {Object} 包含所有已选择或填写的变量的对象。
+   */
+  function collectVars(){
+    const m = {};
+    protoKeys.forEach(k => {
+      const ck = document.querySelector(`[data-proto="${k}"]`);
+      const pt = document.querySelector(`[data-port="${k}"]`);
+      if (ck && ck.checked) {
+        const v = (pt.value || '').trim();
+        m[k] = v;
+      }
+    });
+    optIds.forEach(id => {
+      const el = document.getElementById(id);
+      const v = (el.value || '').trim();
+      if (v !== '' && !el.disabled) {
+        m[id] = v;
+      }
+    });
+    if (argoSwitch.classList.contains('on')) {
+      m['argo'] = 'y';
+      const _agn = (agn.value || '').trim();
+      const _agk = (agk.value || '').trim();
+      if (_agn) m['agn'] = _agn;
+      if (_agk) m['agk'] = _agk;
+    }
+    return m;
+  }
+
+  /**
+   * 将变量对象转换为bash命令字符串。
+   * @param {Object} m - 包含变量的对象。
+   * @returns {string} 格式化后的bash变量字符串。
+   */
+  function toBashVars(m){
+    const keys = Object.keys(m);
+    const ordered = [];
+    protoKeys.forEach(k => { if (keys.includes(k)) ordered.push(k); });
+    ['warp', 'uuid', 'reym', 'cdnym', 'name', 'ippz'].forEach(k => { if (keys.includes(k)) ordered.push(k); });
+    if (keys.includes('argo')) ordered.push('argo');
+    ['agn', 'agk'].forEach(k => { if (keys.includes(k)) ordered.push(k); });
+    keys.forEach(k => { if (!ordered.includes(k)) ordered.push(k); });
+
+    return ordered.map(k => {
+      const val = m[k];
+      if (val === '') return `${k}=""`;
+      if (/[^\w\-\.:/]/.test(val)) {
+        return `${k}="${val.replace(/"/g, '\\"')}"`;
+      }
+      return `${k}="${val}"`;
+    }).join(' ');
+  }
+
+  /**
+   * 渲染并更新输出文本区域。
+   */
+  function render(){
+    const m = collectVars();
+    const vars = toBashVars(m);
+    const selectedCommand = document.querySelector('input[name="commandType"]:checked').value === 'curl' ? CURL : WGET;
+    output.value = (vars ? vars + ' ' : '') + selectedCommand;
+  }
+
+  // 初始化渲染
+  initTheme();
+  // 不再在页面加载时自动生成 UUID，改为仅按钮触发
+  updateCdnymState();
+  render();
+
+  // 为所有输入元素添加事件监听器，实时更新命令
+  allInputs.forEach(el => {
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+  
+  // 快捷命令按钮事件监听
+  document.querySelectorAll('.command-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const command = btn.getAttribute('data-command');
+      const ippzValue = ippzSelect.value;
+      const selectedCommand = document.querySelector('input[name="commandType"]:checked').value === 'curl' ? CURL : WGET;
+      const shouldPreserveIppz = (command === 'list' && (ippzValue === '4' || ippzValue === '6'));
+
+      if (command === 'rep') {
+        const m = collectVars();
+        const vars = toBashVars(m);
+        output.value = (vars ? vars + ' ' : '') + selectedCommand + ' rep';
+      } else {
+        resetForm(shouldPreserveIppz);
+        if (shouldPreserveIppz) {
+          ippzSelect.value = ippzValue;
+          const m = collectVars();
+          m['ippz'] = ippzValue;
+          const vars = toBashVars(m);
+          output.value = `${vars} ${selectedCommand} ${command}`;
+        } else {
+          output.value = `${selectedCommand} ${command}`;
+        }
+      }
+    });
+  });
+
+  // 复制按钮事件监听
+  document.getElementById('copy').addEventListener('click', async () => {
+    const t = document.getElementById('output');
+    t.select(); t.setSelectionRange(0, 99999);
+    try { await navigator.clipboard.writeText(t.value); showToast('已复制到剪贴板'); } catch (e) { document.execCommand('copy'); showToast('已复制'); }
+  });
+
+  // 重置按钮事件监听
+  document.getElementById('reset').addEventListener('click', () => { location.reload(); });
+
+  /**
+   * 显示一个短暂的提示消息。
+   * @param {string} msg - 要显示的文本消息。
+   */
+  function showToast(msg) {
+    const d = document.createElement('div');
+    d.textContent = msg; d.style.position = 'fixed'; d.style.left = '50%'; d.style.top = '20px'; d.style.transform = 'translateX(-50%)';
+    d.style.padding = '10px 14px'; d.style.background = 'rgba(0,0,0,.6)'; d.style.color = '#fff'; d.style.border = '1px solid #334155'; d.style.borderRadius = '10px'; d.style.zIndex = 9999;
+    document.body.appendChild(d); setTimeout(() => d.remove(), 1400);
+  }
+})();
+</script>
+
+<!-- 通过链接加载背景图控件（页脚居中，与首页结构一致） -->
+  <style id="bg-loader-style">
+    footer.page-footer{ text-align:center; padding:16px 12px; color:inherit; }
+    .page-footer .footer-line{ margin-bottom:10px; color:inherit; }
+    @media (prefers-color-scheme: light){ footer.page-footer{ border-color: rgba(2,6,23,.15); } }
+    #bg-loader{ display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; }
+    #bg-loader input{ width:280px; max-width:60vw; padding:6px 10px; border-radius:8px; border:1px solid #334155; outline:none; background:rgba(15,23,42,.85); color:#e5e7eb; }
+    #bg-loader button{ padding:6px 10px; border-radius:8px; border:1px solid #334155; background:#0ea5e9; color:#fff; cursor:pointer; }
+    #bg-loader button.secondary{ background:#64748b; }
+    @media (prefers-color-scheme: light){
+      #bg-loader input{ background:#ffffff; color:#0f172a; border-color:#cbd5e1; }
+      #bg-loader button{ background:#2563eb; }
+      #bg-loader button.secondary{ background:#94a3b8; }
+    }
+  </style>
+  
+  <footer class="page-footer">
+    <div class="footer-line">© <span id="year"></span> <a id="footer-home" href="https://github.com/xzq849" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub 个人主页">GitHub 主页（xzq849）</a> · <a id="footer-about" href="/about.html" aria-label="查看关于页面">关于</a></div>
+    <div id="bg-loader" role="group" aria-label="通过链接加载背景图">
+      <input id="bg-url" type="url" placeholder="粘贴图片直链，例如 https://.../bg.jpg" aria-label="背景图片链接" />
+      <button id="apply-bg" type="button">应用</button>
+      <button id="clear-bg" type="button" class="secondary">清除</button>
+    </div>
+  </footer>
+  
+  <script>
+  (function(){
+    const input = document.getElementById('bg-url');
+    const btnApply = document.getElementById('apply-bg');
+    const btnClear = document.getElementById('clear-bg');
+  
+    function apply(url){
+      if(!url) return;
+      document.body.style.backgroundImage = `url('${url.replace(/'/g, "\\'")}')`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundRepeat = 'no-repeat';
+      document.body.style.backgroundPosition = 'center center';
+      document.body.style.backgroundAttachment = 'fixed';
+    }
+    function clearBg(){
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundRepeat = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+    }
+    btnApply.addEventListener('click', ()=> apply(input.value.trim()));
+    btnClear.addEventListener('click', clearBg);
+    input.addEventListener('keydown', (e)=> { if(e.key==='Enter'){ apply(input.value.trim()); }});
+    const yearEl = document.getElementById('year'); if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
+    var aboutLink = document.getElementById('footer-about');
+    if (aboutLink) {
+      aboutLink.href = (location.protocol === 'file:')
+        ? 'file:///C:/Users/xzqmn/Desktop/All%20In%20One/xzq849.github.io/about.html'
+        : '/about.html';
+    }
+  })();
+  </script>
+ 
+  </body>
+  </html>
+
+
