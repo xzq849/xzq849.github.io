@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 未找到 | xzq849</title>
+  <meta name="description" content="您访问的页面不存在或已被移动" />
+  <style>
+    :root{
+      --bg1:#0ea5e9; /* sky-500 */
+      --bg2:#8b5cf6; /* violet-500 */
+      --text:#0f172a; /* slate-900 */
+      --muted:#475569; /* slate-600 */
+      --card-bg:rgba(255,255,255,.85);
+      --primary:#0ea5e9;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(14,165,233,.25), transparent 60%),
+        radial-gradient(1200px 600px at 100% 0%, rgba(139,92,246,.25), transparent 60%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    }
+    .container{min-height:100dvh; display:grid; place-items:center; padding:4rem 1rem}
+    .card{
+      width:100%; max-width:860px;
+      background:var(--card-bg);
+      border:1px solid rgba(15,23,42,.08);
+      border-radius:20px;
+      padding:2.25rem clamp(1rem, 3vw, 2.5rem);
+      box-shadow:0 10px 30px rgba(2,6,23,.08), 0 2px 8px rgba(2,6,23,.06);
+      backdrop-filter:saturate(140%) blur(8px);
+      text-align:center;
+    }
+    .code{display:inline-block; font-weight:900; letter-spacing:1px; font-size:clamp(3rem, 12vw, 6rem); color:var(--danger); line-height:1}
+    h1{margin:.5rem 0 0; font-size:clamp(1.5rem, 4vw, 2.25rem)}
+    p.lead{margin:.5rem 0 1.25rem; color:var(--muted); font-size:clamp(1rem, 2.2vw, 1.15rem); line-height:1.7}
+    .actions{display:flex; justify-content:center; flex-wrap:wrap; gap:.75rem; margin-top:.5rem}
+    .btn{display:inline-block; padding:.8rem 1.05rem; border-radius:12px; font-weight:700; text-decoration:none; transition:all .2s ease}
+    .btn.primary{background:var(--primary); color:white; box-shadow:0 6px 20px rgba(14,165,233,.35)}
+    .btn.primary:hover{transform:translateY(-1px); box-shadow:0 10px 24px rgba(14,165,233,.42)}
+    .btn.secondary{color:var(--primary); border:1px solid rgba(14,165,233,.35); background:rgba(255,255,255,.6)}
+    .btn.secondary:hover{background:white}
+    form.search{display:flex; gap:.5rem; justify-content:center; margin-top:1rem; flex-wrap:wrap}
+    .search input[type="text"]{width:min(420px, 80vw); padding:.8rem 1rem; border-radius:12px; border:1px solid rgba(15,23,42,.12); background:rgba(255,255,255,.85); outline:none}
+    .search button{padding:.8rem 1rem; border-radius:12px; border:1px solid rgba(14,165,233,.35); background:var(--card-bg); color:var(--primary); font-weight:700; cursor:pointer}
+    .meta{margin-top:1.25rem; color:#64748b; font-size:.95rem}
+    footer{margin-top:.25rem; color:#94a3b8; font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card" role="main" aria-labelledby="title">
+      <div class="code" aria-hidden="true">404</div>
+      <h1 id="title">抱歉，页面不见了</h1>
+      <p class="lead">您访问的页面不存在、已被移动或暂时不可用。请检查链接是否正确，或使用下面的操作继续浏览。</p>
+      <div class="actions">
+        <a class="btn primary" href="/" aria-label="返回首页">返回首页</a>
+        <a class="btn secondary" href="/about.html" aria-label="前往关于页面">关于我</a>
+      </div>
+      <form class="search" action="https://www.google.com/search" method="get" role="search" aria-label="站内搜索">
+        <input type="text" name="q" placeholder="搜索本站（例如：项目、文章、联系）" aria-label="搜索关键词" />
+        <input type="hidden" name="q" value="site:xzq849.github.io" />
+        <button type="submit" aria-label="执行搜索">搜索</button>
+      </form>
+      <div class="meta">提示：部署到 GitHub Pages 后，任何不存在的路径都会显示此自定义 404 页面。</div>
+      <footer>© <span id="year"></span> xzq849 · 404 页面</footer>
+    </main>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // 合并搜索词和 site 限定
+    const form = document.querySelector('form.search');
+    form.addEventListener('submit', (e) => {
+      const inputs = [...new FormData(form).getAll('q')];
+      // 第一个是用户输入，第二个是 site 限定
+      const q = (inputs[0] || '').trim();
+      const site = inputs[1] || '';
+      const params = new URLSearchParams({ q: `${q} ${site}`.trim() });
+      location.href = `${form.action}?${params.toString()}`;
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>

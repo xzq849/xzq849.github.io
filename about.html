@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>关于我 | xzq849</title>
+  <meta name="description" content="关于此站点与作者的简介页面" />
+  <style>
+    :root{
+      --bg1:#0ea5e9; /* sky-500 */
+      --bg2:#8b5cf6; /* violet-500 */
+      --text:#0f172a; /* slate-900 */
+      --muted:#475569; /* slate-600 */
+      --card-bg:rgba(255,255,255,.85);
+      --primary:#0ea5e9;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(14,165,233,.25), transparent 60%),
+        radial-gradient(1200px 600px at 100% 0%, rgba(139,92,246,.25), transparent 60%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    }
+    .container{min-height:100dvh; display:grid; place-items:center; padding:4rem 1rem}
+    .card{
+      width:100%; max-width:860px;
+      background:var(--card-bg);
+      border:1px solid rgba(15,23,42,.08);
+      border-radius:20px;
+      padding:2rem clamp(1rem, 3vw, 2.5rem);
+      box-shadow:0 10px 30px rgba(2,6,23,.08), 0 2px 8px rgba(2,6,23,.06);
+      backdrop-filter:saturate(140%) blur(8px);
+    }
+    h1{margin:0 0 .5rem; font-size:clamp(2rem, 5vw, 3rem); letter-spacing:.2px}
+    p.lead{margin:.25rem 0 1.25rem; color:var(--muted); font-size:clamp(1rem, 2.2vw, 1.25rem); line-height:1.7}
+    .actions{display:flex; flex-wrap:wrap; gap:.75rem}
+    .btn{display:inline-block; padding:.8rem 1.05rem; border-radius:12px; font-weight:700; text-decoration:none; transition:all .2s ease}
+    .btn.primary{background:var(--primary); color:white; box-shadow:0 6px 20px rgba(14,165,233,.35)}
+    .btn.primary:hover{transform:translateY(-1px); box-shadow:0 10px 24px rgba(14,165,233,.42)}
+    .btn.secondary{color:var(--primary); border:1px solid rgba(14,165,233,.35); background:rgba(255,255,255,.6)}
+    .btn.secondary:hover{background:white}
+    .meta{margin-top:1.25rem; color:#64748b; font-size:.95rem}
+    footer{margin-top:.25rem; color:#94a3b8; font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card" role="main">
+      <h1>关于本站</h1>
+      <p class="lead">这是第二个示例页面，你可以把它用作“关于我/关于本站”页面的起点。根据你的需要，替换为你的个人简介、技能、项目经历或站点说明。</p>
+      <div class="actions">
+        <a class="btn primary" href="/" aria-label="返回首页">返回首页</a>
+        <a class="btn secondary" href="index.html#" aria-label="查看首页示例按钮">查看首页示例</a>
+      </div>
+      <div class="meta">提示：此页面文件名是 about.html，你也可以复制它来快速创建更多页面。</div>
+      <footer>© <span id="year"></span> xzq849 · 关于页面</footer>
+    </main>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

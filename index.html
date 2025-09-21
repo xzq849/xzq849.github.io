@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>我的主页 | xzq849</title>
+  <meta name="description" content="一个简洁现代的静态网页模板" />
+  <style>
+    :root{
+      --bg1:#0ea5e9; /* sky-500 */
+      --bg2:#8b5cf6; /* violet-500 */
+      --text:#0f172a; /* slate-900 */
+      --muted:#475569; /* slate-600 */
+      --card-bg:rgba(255,255,255,.85);
+      --primary:#0ea5e9;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(14,165,233,.25), transparent 60%),
+        radial-gradient(1200px 600px at 100% 0%, rgba(139,92,246,.25), transparent 60%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    }
+    .container{min-height:100dvh; display:grid; place-items:center; padding:4rem 1rem}
+    .card{
+      width:100%; max-width:860px;
+      background:var(--card-bg);
+      border:1px solid rgba(15,23,42,.08);
+      border-radius:20px;
+      padding:2rem clamp(1rem, 3vw, 2.5rem);
+      box-shadow:0 10px 30px rgba(2,6,23,.08), 0 2px 8px rgba(2,6,23,.06);
+      backdrop-filter:saturate(140%) blur(8px);
+    }
+    h1{margin:0 0 .5rem; font-size:clamp(2rem, 5vw, 3rem); letter-spacing:.2px}
+    p.lead{margin:.25rem 0 1.25rem; color:var(--muted); font-size:clamp(1rem, 2.2vw, 1.25rem); line-height:1.7}
+    .actions{display:flex; flex-wrap:wrap; gap:.75rem}
+    .btn{display:inline-block; padding:.8rem 1.05rem; border-radius:12px; font-weight:700; text-decoration:none; transition:all .2s ease}
+    .btn.primary{background:var(--primary); color:white; box-shadow:0 6px 20px rgba(14,165,233,.35)}
+    .btn.primary:hover{transform:translateY(-1px); box-shadow:0 10px 24px rgba(14,165,233,.42)}
+    .btn.secondary{color:var(--primary); border:1px solid rgba(14,165,233,.35); background:rgba(255,255,255,.6)}
+    .btn.secondary:hover{background:white}
+    .meta{margin-top:1.25rem; color:#64748b; font-size:.95rem}
+    footer{margin-top:.25rem; color:#94a3b8; font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card" role="main">
+      <h1>你好，世界！</h1>
+      <p class="lead">这是一个简洁现代的静态网页模板。你可以直接在此页面上修改内容，或逐步扩展为完整的个人/项目主页。</p>
+      <div class="actions">
+        <a class="btn primary" href="#" aria-label="开始编辑此页面">开始编辑</a>
+        <a class="btn secondary" id="go-agsbx" href="/agsbx.html" aria-label="跳转到 agsbx 页面">前往 Argosbx 生成器</a>
+        <a class="btn secondary" href="https://github.com/xzq849" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub">GitHub 主页（xzq849）</a>
+      </div>
+      <div class="meta">提示：将本仓库命名为 xzq849.github.io 并启用 GitHub Pages 后，此页面可作为你的主页在线访问。</div>
+      <footer>© <span id="year"></span> <a id="footer-home" href="https://github.com/xzq849" target="_blank" rel="noopener noreferrer" aria-label="访问 GitHub 个人主页">GitHub 主页（xzq849）</a> · <a id="footer-about" href="/about.html" aria-label="查看关于页面">关于</a></footer>
+    </main>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    (function(){
+      var link = document.getElementById('go-agsbx');
+      if (link) {
+        link.href = (location.protocol === 'file:')
+          ? 'file:///C:/Users/xzqmn/Desktop/All%20In%20One/xzq849.github.io/agsbx.html'
+          : '/agsbx.html';
+      }
+      var aboutLink = document.getElementById('footer-about');
+      if (aboutLink) {
+        aboutLink.href = (location.protocol === 'file:')
+          ? 'file:///C:/Users/xzqmn/Desktop/All%20In%20One/xzq849.github.io/about.html'
+          : '/about.html';
+      }
+    })();
+  </script>
+</body>
+</html>
